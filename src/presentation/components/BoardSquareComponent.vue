@@ -1,29 +1,32 @@
 <script setup lang="ts">
-import type { ChessPiece } from '@/domain/entities/chess_piece';
-import type { ChessSquare } from '@/domain/entities/chess_square';
-import { ChessColor } from '@/domain/entities/value_objects/chess_color';
+  import type { ChessPiece } from '@/domain/entities/ChessPiece';
+  import type { ChessSquare } from '@/domain/entities/ChessSquare';
+  import { ChessColor } from '@/domain/entities/value_objects/ChessColor';
 
-const props = defineProps({
+  const props = defineProps({
     square: Object as () => ChessSquare | null,
     piece: Object as () => ChessPiece | null,
-})
+  });
 </script>
 
 <template>
-    <div class="board_square" :class="{
-        white: square?.color === ChessColor.White,
-        black: square?.color === ChessColor.Black,
-        selected: square?.isSelected,
-        possibleMove: square?.isMovePossible
-    }">
-        <div v-if="piece">
-            <img :src="piece.image" />
-        </div>
+  <div
+    class="board_square"
+    :class="{
+      white: square?.color === ChessColor.White,
+      black: square?.color === ChessColor.Black,
+      selected: square?.isSelected,
+      possibleMove: square?.isMovePossible,
+    }"
+  >
+    <div v-if="piece">
+      <img :src="piece.image" />
     </div>
+  </div>
 </template>
 
 <style scoped>
-.board_square {
+  .board_square {
     width: 10vh;
     height: 10vh;
     border: 1px solid black;
@@ -31,21 +34,22 @@ const props = defineProps({
     display: flex;
     justify-content: center;
     align-items: center;
-}
+  }
 
-.white {
+  .white {
     background-color: #90ee90;
     /* light green */
-}
+  }
 
-.black {
+  .black {
     background-color: #006400;
     /* dark green */
-}
+  }
 
-.selected,
-.possibleMove {
+  .selected,
+  .possibleMove {
     background-color: rgba(255, 255, 0, 0.5);
     /* semi-transparent yellow */
-}
+  }
 </style>
+@/domain/entities/ChessPiece @/domain/entities/ChessSquare @/domain/entities/value_objects/ChessColor
