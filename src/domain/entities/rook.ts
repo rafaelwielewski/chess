@@ -3,7 +3,7 @@ import { ChessColor } from './value_objects/ChessColor';
 import { PiecesName } from './value_objects/PiecesTypes';
 
 export class Rook extends ChessPiece {
-  constructor({ color }: { color: ChessColor }) {
+  constructor ({ color }: { color: ChessColor }) {
     const imageUrl =
       color === ChessColor.White
         ? 'https://upload.wikimedia.org/wikipedia/commons/7/72/Chess_rlt45.svg'
@@ -11,16 +11,16 @@ export class Rook extends ChessPiece {
     super({
       name: PiecesName.Rook,
       image: imageUrl,
-      color: color,
+      color,
       firstMove: true,
       moveVerticalDistance: 8,
       moveHorizontalDistance: 8,
+      moveDiagonalDistance: 0,
       canMoveDiagonally: false,
       canJumpOverPieces: false,
       canMoveTwoSpacesFromStart: false,
       canCaptureDiagonally: false,
-      canMoveBackwards: true,
-      canCaptureBackwards: true,
+      canMoveBackwards: true
     });
   }
 }

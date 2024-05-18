@@ -1,13 +1,17 @@
 import type { ChessColor } from './value_objects/ChessColor';
 
-export interface ChessSquare {
+interface ChessSquareArgs {
   color: ChessColor;
   isSelected: boolean;
   isMovePossible: boolean;
 }
 
 export class ChessSquare {
-  constructor(args: ChessSquare) {
+  color: ChessColor;
+  isSelected: boolean;
+  isMovePossible: boolean;
+
+  constructor (args: ChessSquareArgs) {
     const { color, isSelected, isMovePossible } = args;
     this.color = color;
     this.isSelected = isSelected;

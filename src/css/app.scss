@@ -1,0 +1,64 @@
+// app global css in SCSS form
+@import 'quasar.variables.scss';
+@import 'typography.scss';
+@import 'colors.scss';
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.logo__img{
+    width: 30px;
+    height: 25px;
+}
+
+.right{
+    justify-content: right;
+    text-align: right;
+}
+
+.left{
+    justify-content: left;
+    text-align: left;
+}
+
+.main__div{
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    height: 100%;
+    width: 100%;
+}
+
+.popup-card{
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px;
+    border-radius: 15px;
+    width: 15vw;
+    min-width: 150px;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.no-wrap{
+    white-space: nowrap;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease-in-out;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}

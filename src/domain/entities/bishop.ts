@@ -3,7 +3,7 @@ import { ChessColor } from './value_objects/ChessColor';
 import { PiecesName } from './value_objects/PiecesTypes';
 
 export class Bishop extends ChessPiece {
-  constructor({ color }: { color: ChessColor }) {
+  constructor ({ color }: { color: ChessColor }) {
     const imageUrl =
       color === ChessColor.White
         ? 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Chess_blt45.svg'
@@ -11,16 +11,17 @@ export class Bishop extends ChessPiece {
     super({
       name: PiecesName.Bishop,
       image: imageUrl,
-      color: color,
+      color,
       firstMove: true,
-      moveVerticalDistance: 8,
-      moveHorizontalDistance: 8,
+      moveVerticalDistance: 0,
+      moveHorizontalDistance: 0,
+      moveDiagonalDistance: 8,
       canMoveDiagonally: true,
       canJumpOverPieces: false,
       canMoveTwoSpacesFromStart: false,
       canCaptureDiagonally: true,
       canMoveBackwards: true,
-      canCaptureBackwards: true,
+      specialMovePatterns: []
     });
   }
 }
