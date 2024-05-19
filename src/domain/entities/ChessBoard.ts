@@ -7,6 +7,7 @@ import { Queen } from './Queen';
 import { King } from './King';
 import { ChessColor } from './value_objects/ChessColor';
 import { ChessSquare } from './ChessSquare';
+import { PiecesName } from './value_objects/PiecesTypes';
 
 export class ChessBoard {
   public readonly size: number = 8;
@@ -19,7 +20,6 @@ export class ChessBoard {
 
   getPossibleMoves (position: { x: number; y: number }): { x: number; y: number }[] {
     const piece = this.pieces[position.x][position.y];
-    console.log('x: ' + position.x + ' y: ' + position.y);
     console.log(piece);
     if (!piece) return [];
 
@@ -90,8 +90,6 @@ export class ChessBoard {
 
     // remove movimentos que deixam o rei em xeque
 
-    console.log(possibleCaptures);
-
     return possibleCaptures;
   }
 
@@ -110,11 +108,101 @@ export class ChessBoard {
     const piece = this.pieces[from.x][from.y];
     if (!piece) return;
 
+    // move piece
     this.pieces[to.x][to.y] = piece;
     piece.move(to);
+
+    // remove captured piece
     this.pieces[from.x][from.y] = null;
+
+    // check for checkmate and stalemate
+    if (this.isKingInCheck(this.turn) && !this.canKingMove(this.turn)) {
+      this.checkMate = true;
+      return;
+    } else if (!this.canPlayerMove(this.turn)) {
+      this.staleMate = true;
+      return;
+    }
+
     // change turn
     this.turn = this.turn === ChessColor.White ? ChessColor.Black : ChessColor.White;
+  }
+
+  isKingInCheck (color: ChessColor): boolean {
+    const king = this.pieces.flat().find((piece) => piece?.name === 'King' && piece.color === color);
+    if (!king) return false;
+
+    const kingPosition = king.position;
+    const opponentColor = color === ChessColor.White ? ChessColor.Black : ChessColor.White;
+    const opponentPieces = this.pieces.flat().filter((piece) => piece?.color === opponentColor);
+
+    for (const piece of opponentPieces) {
+      const possibleCaptures = piece?.getPossibleCapturesMoves();
+      if (possibleCaptures && possibleCaptures.find((move) => move.x === kingPosition.x && move.y === kingPosition.y)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  canKingMove (color: ChessColor): boolean {
+    const king = this.pieces.flat().find((piece) => piece?.name === PiecesName.King && piece.color === color);
+    if (!king) return false;
+
+    const kingPosition = king.position;
+    const possibleMoves = king.getPossibleMoves();
+    for (const move of possibleMoves) {
+    // Save the current position
+      const currentPiece = this.pieces[move.x][move.y];
+
+      // Temporarily move the king
+      this.pieces[move.x][move.y] = king;
+      this.pieces[kingPosition.x][kingPosition.y] = null;
+
+      const isInCheck = this.isKingInCheck(color);
+
+      // Move the king back
+      this.pieces[kingPosition.x][kingPosition.y] = king;
+      this.pieces[move.x][move.y] = currentPiece;
+
+      if (!isInCheck) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  canPlayerMove (color: ChessColor): boolean {
+    const playerPieces = this.pieces.flat().filter((piece) => piece?.color === color);
+    for (const piece of playerPieces) {
+      if (piece) {
+        const possibleMoves = piece.getPossibleMoves();
+        if (possibleMoves) {
+          for (const move of possibleMoves) {
+            // Save the current position
+            const currentPiece = this.pieces[move.x][move.y];
+
+            // Temporarily move the piece
+            this.pieces[move.x][move.y] = piece;
+            this.pieces[piece.position.x][piece.position.y] = null;
+
+            const isInCheck = this.isKingInCheck(color);
+
+            // Move the piece back
+            this.pieces[piece.position.x][piece.position.y] = piece;
+            this.pieces[move.x][move.y] = currentPiece;
+
+            if (!isInCheck) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    return false;
   }
 
   initializeBoardSquares (): ChessSquare[][] {
@@ -133,7 +221,6 @@ export class ChessBoard {
         });
       }
     }
-    console.log(board);
 
     return board;
   }
@@ -165,7 +252,6 @@ export class ChessBoard {
     board[5][7] = new Bishop({ color: ChessColor.White, position: { x: 5, y: 7 } });
     board[6][7] = new Knight({ color: ChessColor.White, position: { x: 6, y: 7 } });
     board[7][7] = new Rook({ color: ChessColor.White, position: { x: 7, y: 7 } });
-    console.log(board);
 
     return board;
   }

@@ -28,10 +28,8 @@ export const useChessBoardStore = defineStore({
       this.selectedPosition = { x, y };
 
       this.possibleMoves = this.chessBoard.getPossibleMoves({ x, y });
-      console.log(this.possibleMoves);
       this.possibleMoves.forEach((e) => {
         this.chessBoard.squares[e.x][e.y].isMovePossible = true;
-        console.log(this.chessBoard.squares[e.x][e.y]);
       });
 
       // hightlight
@@ -42,10 +40,8 @@ export const useChessBoardStore = defineStore({
       this.selectedPosition = { x, y };
 
       this.possibleCaptures = this.chessBoard.getPossibleCaptures({ x, y });
-      console.log(this.possibleCaptures);
       this.possibleCaptures.forEach((e) => {
         this.chessBoard.squares[e.x][e.y].isCapturePossible = true;
-        console.log(this.chessBoard.squares[e.x][e.y]);
       });
 
       // hightlight
@@ -67,60 +63,48 @@ export const useChessBoardStore = defineStore({
     },
 
     handleClick (x: number, y: number) {
-      const selectedPiece = this.chessBoard.squares[x][y];
+      const selectedPiece = this.chessBoard.pieces[x][y];
+      const selectedSquare = this.chessBoard.squares[x][y];
       const isSelecting = this.selectedPosition === null;
-      const isPieceSelected = this.selectedPosition !== null;
       const isPieceTurn = selectedPiece?.color === this.chessBoard.turn;
-      const isMovePossible = this.possibleMoves.some((pos) => pos.x === x && pos.y === y);
-      const isCapturePossible = this.possibleCaptures.some((pos) => pos.x === x && pos.y === y);
       const isPiece = selectedPiece !== null;
-      const isPieceNotColor = selectedPiece?.color !== this.chessBoard.turn;
       const isPieceAlreadySelected = this.selectedPosition?.x === x && this.selectedPosition?.y === y;
 
       // check if selected position is null and piece is turn color
-      if (isSelecting && selectedPiece !== null && selectedPiece?.color !== this.chessBoard.turn)
+      if (isSelecting && isPiece && !isPieceTurn)
         return;
 
       // Check if selected position is not null and piece is already selected
-      if (isPieceSelected && isPieceAlreadySelected) {
+      if (this.selectedPosition && isPieceAlreadySelected) {
         this.clearHighlights();
-        return;
       }
 
       // Check if selected position is not null and if the clicked position is a possible capture
-      if (isPieceSelected && selectedPiece.isCapturePossible) {
+      if (this.selectedPosition && selectedSquare.isCapturePossible) {
         this.capturePiece(this.selectedPosition, { x, y });
         this.clearHighlights();
       }
 
       // Check if selected position is null and if the clicked position is a piece
-      if (isPieceSelected && isPiece && selectedPiece?.color !== this.chessBoard.turn) {
+      if (this.selectedPosition && isPiece && !isPieceTurn) {
         this.clearHighlights();
-        return;
       }
 
       // Check if selected position is null and if the clicked position is a piece
-      if (isSelecting && isPiece) {
+      if (isSelecting && isPiece && isPieceTurn) {
         this.showMoveHighlights(x, y);
         this.showCaptureHighlights(x, y);
-      }
-
-      // Check if selected position is not null and if the clicked position is not a possible move and if the clicked position is not a piece
-      if (isPieceSelected && !this.possibleMoves.some((pos) => pos.x === x && pos.y === y) && selectedPiece === null) {
-        this.clearHighlights();
-        return;
       }
 
       // Check if selected position is not null and if the clicked position is not a possible move and if the clicked position is a piece
-      if (isPieceSelected && isPiece) {
+      if (this.selectedPosition && isPiece) {
         this.clearHighlights();
         this.showMoveHighlights(x, y);
         this.showCaptureHighlights(x, y);
-        return;
       }
 
       // Check if selected position is not null and if the clicked position is a possible move
-      if (isPieceSelected && selectedPiece.isMovePossible) {
+      if (this.selectedPosition && selectedSquare.isMovePossible) {
         this.movePiece(this.selectedPosition, { x, y });
         this.clearHighlights();
       }
