@@ -19,6 +19,7 @@ const props = defineProps({
       <img :src="piece.image" />
     </div>
     <div v-if="square?.isMovePossible" class="possible-move-indicator"></div>
+    <div v-if="square?.isCapturePossible" class="possible-capture-indicator"></div>
   </div>
 </template>
 
@@ -41,6 +42,18 @@ const props = defineProps({
   width: 20px;
   height: 20px;
   background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  /* Centraliza a bolinha no quadrado */
+}
+
+.possible-capture-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  background-color: rgba(255, 0, 0, 0.5);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   /* Centraliza a bolinha no quadrado */

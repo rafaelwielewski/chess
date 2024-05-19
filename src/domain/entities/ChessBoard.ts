@@ -23,128 +23,76 @@ export class ChessBoard {
     console.log(piece);
     if (!piece) return [];
 
-    const moves: { x: number; y: number }[] = [];
-
-    // Movimento vertical
-    for (let i = 1; i <= piece.moveVerticalDistance; i++) {
-      if (piece.color === ChessColor.White) {
-        // if first move and can move 2 squares
-        if (position.y === 6 && piece.canMoveTwoSpacesFromStart) {
-          moves.push({ x: position.x, y: position.y - 2 });
-        }
-        if (position.y - i >= 0) {
-          // Check if there is a piece in the way
-          const pieceInWay = this.pieces[position.x][position.y - i];
-          if (pieceInWay) {
-            break;
-          }
-          moves.push({ x: position.x, y: position.y - i });
-        }
-      } else {
-        // if first move and can move 2 squares
-        if (position.y === 1 && piece.canMoveTwoSpacesFromStart) {
-          moves.push({ x: position.x, y: position.y + 2 });
-        }
-        if (position.y + i < this.size) {
-          // Check if there is a piece in the way
-          const pieceInWay = this.pieces[position.x][position.y + i];
-          if (pieceInWay) {
-            break;
-          }
-          moves.push({ x: position.x, y: position.y + i });
-        }
-      }
-    }
-
-    // Movimento horizontal
-    for (let i = 1; i <= piece.moveHorizontalDistance; i++) {
-      // Check if there is a piece in the way to the left
-      if (position.x - i >= 0) {
-        const pieceInWay = this.pieces[position.x - i][position.y];
-        if (pieceInWay) {
-          break;
-        }
-        moves.push({ x: position.x - i, y: position.y });
-      }
-
-      // Check if there is a piece in the way to the right
-      if (position.x + i < this.size) {
-        const pieceInWay = this.pieces[position.x + i][position.y];
-        if (pieceInWay) {
-          break;
-        }
-        moves.push({ x: position.x + i, y: position.y });
-      }
-    }
-
-    // Movimento diagonal
-    // Diagonal superior esquerda
-    for (let i = 1; i <= piece.moveDiagonalDistance; i++) {
-      console.log(i);
-      if (position.x - i >= 0 && position.y - i >= 0) {
-        const pieceInWay = this.pieces[position.x - i][position.y - i];
-        console.log(pieceInWay);
-        if (pieceInWay) {
-          break;
-        }
-        moves.push({ x: position.x - i, y: position.y - i });
-      }
-    }
-    // Diagonal superior direita
-    for (let i = 1; i <= piece.moveDiagonalDistance; i++) {
-      if (position.x - i >= 0 && position.y + i < this.size) {
-        const pieceInWay = this.pieces[position.x - i][position.y + i];
-        if (pieceInWay) {
-          break;
-        }
-        moves.push({ x: position.x - i, y: position.y + i });
-      }
-    }
-    for (let i = 1; i <= piece.moveDiagonalDistance; i++) {
-      // Diagonal inferior esquerda
-      if (position.x + i < this.size && position.y - i >= 0) {
-        const pieceInWay = this.pieces[position.x + i][position.y - i];
-        if (pieceInWay) {
-          break;
-        }
-        moves.push({ x: position.x + i, y: position.y - i });
-      }
-    }
-    // Diagonal inferior direita
-    for (let i = 1; i <= piece.moveDiagonalDistance; i++) {
-      if (position.x + i < this.size && position.y + i < this.size) {
-        const pieceInWay = this.pieces[position.x + i][position.y + i];
-        if (pieceInWay) {
-          break;
-        }
-        moves.push({ x: position.x + i, y: position.y + i });
-      }
-    }
-
-    // Movimentos especiais
-    console.log(piece.specialMovePatterns);
-
-    if (piece.specialMovePatterns && piece.specialMovePatterns.length > 0) {
-      console.log('special moves');
-      for (const pattern of piece.specialMovePatterns) {
-        console.log(pattern);
-        const newX = position.x + pattern.x;
-        const newY = position.y + pattern.y;
-        if (newX >= 0 && newX < this.size && newY >= 0 && newY < this.size) {
-          const pieceInWay = this.pieces[newX][newY];
-          if (!pieceInWay)
-            moves.push({ x: newX, y: newY });
-        }
-      }
-    }
-
-    console.log(moves);
+    let possibleMoves = piece.getPossibleMoves();
 
     // Remove movimentos que passam por cima de peças
-    return moves.filter((move) => {
+    possibleMoves = possibleMoves.filter((move) => {
       const piece = this.pieces[move.x][move.y];
-      return !piece || piece.color !== this.turn;
+      return !piece;
     });
+
+    // remove movimentos que que não podem pular peças
+    if (!piece.canJumpPieces) {
+      possibleMoves = possibleMoves.filter((move) => {
+        const dx = move.x - position.x;
+        const dy = move.y - position.y;
+        const stepX = dx === 0 ? 0 : dx > 0 ? 1 : -1;
+        const stepY = dy === 0 ? 0 : dy > 0 ? 1 : -1;
+        let x = position.x + stepX;
+        let y = position.y + stepY;
+        while (x !== move.x || y !== move.y) {
+          if (this.pieces[x][y]) {
+            return false;
+          }
+          x += stepX;
+          y += stepY;
+        }
+        return true;
+      });
+    }
+
+    // remove movimentos que deixam o rei em xeque
+
+    return possibleMoves;
+  }
+
+  getPossibleCaptures (position: { x: number; y: number }): { x: number; y: number }[] {
+    const piece = this.pieces[position.x][position.y];
+    if (!piece) return [];
+
+    let possibleCaptures = piece.getPossibleCapturesMoves();
+
+    // Remove movimentos que passam por cima de peças
+    possibleCaptures = possibleCaptures.filter((move) => {
+      const piece = this.pieces[move.x][move.y];
+      return piece && piece.color !== this.turn;
+    });
+
+    // remove movimentos que que não podem pular peças
+    if (!piece.canJumpPieces) {
+      possibleCaptures = possibleCaptures.filter((move) => {
+        const dx = move.x - position.x;
+        const dy = move.y - position.y;
+        const stepX = dx === 0 ? 0 : dx > 0 ? 1 : -1;
+        const stepY = dy === 0 ? 0 : dy > 0 ? 1 : -1;
+        let x = position.x + stepX;
+        let y = position.y + stepY;
+        while (x !== move.x || y !== move.y) {
+          if (this.pieces[x][y]) {
+            return false;
+          }
+          x += stepX;
+          y += stepY;
+        }
+        return true;
+      });
+    }
+
+    // remove movimentos que deixam o rei em xeque
+
+    console.log(possibleCaptures);
+
+    return possibleCaptures;
   }
 
   movePiece (from: { x: number; y: number }, to: { x: number; y: number }): void {
@@ -152,6 +100,18 @@ export class ChessBoard {
     if (!piece) return;
 
     this.pieces[to.x][to.y] = piece;
+    piece.move(to);
+    this.pieces[from.x][from.y] = null;
+    // change turn
+    this.turn = this.turn === ChessColor.White ? ChessColor.Black : ChessColor.White;
+  }
+
+  capturePiece (from: { x: number; y: number }, to: { x: number; y: number }): void {
+    const piece = this.pieces[from.x][from.y];
+    if (!piece) return;
+
+    this.pieces[to.x][to.y] = piece;
+    piece.move(to);
     this.pieces[from.x][from.y] = null;
     // change turn
     this.turn = this.turn === ChessColor.White ? ChessColor.Black : ChessColor.White;
@@ -168,7 +128,8 @@ export class ChessBoard {
         board[x][y] = new ChessSquare({
           color,
           isSelected: false,
-          isMovePossible: false
+          isMovePossible: false,
+          isCapturePossible: false
         });
       }
     }
@@ -183,27 +144,27 @@ export class ChessBoard {
       .map(() => Array(8).fill(null));
 
     for (let i = 0; i < 8; i++) {
-      board[i][1] = new Pawn({ color: ChessColor.Black });
-      board[i][6] = new Pawn({ color: ChessColor.White });
+      board[i][1] = new Pawn({ color: ChessColor.Black, position: { x: i, y: 1 } });
+      board[i][6] = new Pawn({ color: ChessColor.White, position: { x: i, y: 6 } });
     }
 
-    board[0][0] = new Rook({ color: ChessColor.Black });
-    board[1][0] = new Knight({ color: ChessColor.Black });
-    board[2][0] = new Bishop({ color: ChessColor.Black });
-    board[3][0] = new Queen({ color: ChessColor.Black });
-    board[4][0] = new King({ color: ChessColor.Black });
-    board[5][0] = new Bishop({ color: ChessColor.Black });
-    board[6][0] = new Knight({ color: ChessColor.Black });
-    board[7][0] = new Rook({ color: ChessColor.Black });
+    board[0][0] = new Rook({ color: ChessColor.Black, position: { x: 0, y: 0 } });
+    board[1][0] = new Knight({ color: ChessColor.Black, position: { x: 1, y: 0 } });
+    board[2][0] = new Bishop({ color: ChessColor.Black, position: { x: 2, y: 0 } });
+    board[3][0] = new Queen({ color: ChessColor.Black, position: { x: 3, y: 0 } });
+    board[4][0] = new King({ color: ChessColor.Black, position: { x: 4, y: 0 } });
+    board[5][0] = new Bishop({ color: ChessColor.Black, position: { x: 5, y: 0 } });
+    board[6][0] = new Knight({ color: ChessColor.Black, position: { x: 6, y: 0 } });
+    board[7][0] = new Rook({ color: ChessColor.Black, position: { x: 7, y: 0 } });
 
-    board[0][7] = new Rook({ color: ChessColor.White });
-    board[1][7] = new Knight({ color: ChessColor.White });
-    board[2][7] = new Bishop({ color: ChessColor.White });
-    board[3][7] = new Queen({ color: ChessColor.White });
-    board[4][7] = new King({ color: ChessColor.White });
-    board[5][7] = new Bishop({ color: ChessColor.White });
-    board[6][7] = new Knight({ color: ChessColor.White });
-    board[7][7] = new Rook({ color: ChessColor.White });
+    board[0][7] = new Rook({ color: ChessColor.White, position: { x: 0, y: 7 } });
+    board[1][7] = new Knight({ color: ChessColor.White, position: { x: 1, y: 7 } });
+    board[2][7] = new Bishop({ color: ChessColor.White, position: { x: 2, y: 7 } });
+    board[3][7] = new Queen({ color: ChessColor.White, position: { x: 3, y: 7 } });
+    board[4][7] = new King({ color: ChessColor.White, position: { x: 4, y: 7 } });
+    board[5][7] = new Bishop({ color: ChessColor.White, position: { x: 5, y: 7 } });
+    board[6][7] = new Knight({ color: ChessColor.White, position: { x: 6, y: 7 } });
+    board[7][7] = new Rook({ color: ChessColor.White, position: { x: 7, y: 7 } });
     console.log(board);
 
     return board;
